@@ -1,8 +1,8 @@
 #include <iostream>
 
 #include "SpscQueueFixed.h"
-
 #include <assert.h>
+#include <syncstream>
 #include <thread>
 #include <vector>
 
@@ -14,7 +14,6 @@ struct TestStruct {
 
 int main() {
     const std::vector<TestStruct> data(2048);
-
     auto queue = spsc_queue_fix<TestStruct, 1024>();
     auto pushThread = std::thread([&]() {
         try {
@@ -22,7 +21,7 @@ int main() {
                 queue.push(it.base());
             }
         } catch (const std::exception &e) {
-            std::cout << "ERRR: " << e.what() << std::endl;
+            std::osyncstream(std::cout) << "ERRR: " << e.what() << std::endl;
         }
     });
 
@@ -35,9 +34,9 @@ int main() {
                     break;
             }
         } catch (const std::exception &e) {
-            std::cout << "ERRR POP: " << e.what() << std::endl;
+            std::osyncstream(std::cout) << "ERRR POP: " << e.what() << std::endl;
         }
-        std::cout << "POPED: " << cntr;
+        std::osyncstream(std::cout) << "POPED: " << cntr;
         queue.stop();
     });
 

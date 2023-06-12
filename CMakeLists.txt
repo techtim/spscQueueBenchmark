@@ -10,4 +10,6 @@ add_subdirectory(benchmarks)
 
 message("Thread sanitizer enabled for debug build")
 set(CMAKE_CXX_FLAGS_DEBUG
-        "${CMAKE_CXX_FLAGS_DEBUG} -O1 -fsanitize=thread") # -fsanitize=thread : not working on arm
+        "${CMAKE_CXX_FLAGS_DEBUG} -O1 -fsanitize=thread")
+
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")

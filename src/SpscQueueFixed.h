@@ -3,7 +3,11 @@
 #include <array>
 #include <atomic>
 #include <emmintrin.h>
+#include <iostream>
+#include <syncstream>
 #include <utility>
+
+#include <thread>
 
 #define FORCE_INLINE inline __attribute__((always_inline))
 #define UNLIKELY(condition) __builtin_expect(static_cast<bool>(condition), 0)
@@ -12,8 +16,8 @@ template<class T, size_t size>
 class spsc_queue_fix {
 private:
     alignas(64) std::atomic<uint64_t> stopFlag = 0;
-    alignas(64) uint64_t pread = 0;
-    alignas(64) uint64_t pwrite = 0;
+    alignas(64) uint64_t pread = 0; /// no need it atomic: regular type enough - pread is accessed only from consumer thread
+    alignas(64) uint64_t pwrite = 0;/// pwrite - only from producer
     alignas(64) std::array<const T *, size> buffer;
 
 public:
@@ -57,5 +61,11 @@ public:
 
     FORCE_INLINE void stop() {
         stopFlag = 1;
+    }
+
+    FORCE_INLINE void restart() {
+        stopFlag = 1;
+        pread = 0;
+        pwrite = 0;
     }
 };//spsc queue

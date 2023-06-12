@@ -21,7 +21,8 @@ public:
         std::fill(buffer.begin(), buffer.end(), nullptr);
     }
 
-    /// Both producer and consumer make reads at same addresses in the buffer without any ordering - that lead to race conditions.
+    /// Both producer and consumer make reads at same addresses in the buffer without any ordering
+    /// that lead to race conditions confirmed by TSAN.
     FORCE_INLINE bool empty() const { return buffer[pread] == nullptr; }
 
     FORCE_INLINE bool available() const {
@@ -49,12 +50,19 @@ public:
             return result;
         }
 
+        /// can use swap
         result = buffer[pread];
         buffer[pread] = nullptr;
+        /// mod is pricey can check: pwrite+1 < size ? pwrite + 1  : (pwrite+1) % size;
         pread = (pread + 1) % size;
         return result;
     }
     FORCE_INLINE void stop() {
         stopFlag = 1;
+    }
+    FORCE_INLINE void restart() {
+        stopFlag = 1;
+        pread = 0;
+        pwrite = 0;
     }
 };//spsc queue
